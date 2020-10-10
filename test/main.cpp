@@ -1,4 +1,4 @@
-#include "BigNum.h"
+#include "../src/BigNum.h"
 #include <rapidcheck.h>
 #include <stdio.h>
 
