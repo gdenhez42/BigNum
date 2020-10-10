@@ -102,8 +102,10 @@ namespace {
   }
 }
 
+const BigNum BigNum::ZERO = BigNum();
+
 BigNum::BigNum()
-  : m_nb(0, 1),
+  : m_nb(1),
     m_frac(0),
     m_isNegative(false)
 {
@@ -222,6 +224,17 @@ BigNum& BigNum::operator-=(const BigNum& other)
 
 BigNum& BigNum::operator*=(const BigNum& other) {
 
+  if (*this == ZERO) {
+    return *this;
+  }
+
+  if (other == ZERO) {
+    m_nb = BigNat(1,0);
+    m_frac = 0;
+    m_isNegative = false;
+    return *this;
+  }
+
   m_isNegative = m_isNegative ^ other.m_isNegative;
 
   BigNat result;
@@ -258,6 +271,7 @@ BigNum& BigNum::operator*=(const BigNum& other) {
 }
 
 BigNum& BigNum::operator/=(const BigNum& other) {
+
   return *this;
 }
 

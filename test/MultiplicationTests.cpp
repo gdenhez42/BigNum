@@ -2,6 +2,15 @@
 #include <gtest/gtest.h>
 #include <rapidcheck/gtest.h>
 
+TEST(MultiplicationTests, SomethingTimesZeroEqualsZero)
+{
+  BigNum b1(std::string("-123456789"));
+  BigNum b2(std::string("0"));
+
+  EXPECT_EQ(b1*b2, b2);
+  EXPECT_EQ(b2*b1, b2);
+}
+
 
 RC_GTEST_PROP(MultiplicationTests,
               MultiplicationWithIntWorks,

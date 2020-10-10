@@ -40,5 +40,6 @@ target_link_libraries(bignumtest
 	
 target_include_directories(bignumtest PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}/rapidcheck-download/rapidcheck/ext/gmock/gtest/include)
-	
+
+
 

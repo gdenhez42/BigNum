@@ -17,6 +17,8 @@ class BigNum {
   BigNum();
   BigNum(const std::string& p_str);
 
+  static const BigNum ZERO;
+
   // The size in bytes of the integer part
   size_t size() const { return m_nb.size(); }
 
