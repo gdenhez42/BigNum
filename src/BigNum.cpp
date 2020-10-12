@@ -72,10 +72,14 @@ namespace {
     BigNat result;
     int temp = 0;
     for (size_t i = 0; i < nb.size(); i++) {
-      temp = nb[i] * num;
+      temp = nb[i] * num + temp;
       result.push_back(temp % 256);
       temp /= 256;
     }
+    if (temp > 0) {
+      result.push_back(temp);
+    }
+
     return result;
   }
 
@@ -98,7 +102,7 @@ namespace {
         test -= step;
       }
     }
-    return test;
+    return result;
   }
 }
 
@@ -270,7 +274,70 @@ BigNum& BigNum::operator*=(const BigNum& other) {
   return *this;
 }
 
-BigNum& BigNum::operator/=(const BigNum& other) {
+BigNum& BigNum::operator/=(const BigNum& other)
+{
+  if (other == ZERO) {
+    throw "Division by zero";
+  }
+
+  m_isNegative = m_isNegative ^ other.m_isNegative;
+
+  BigNat rest(1, m_frac);
+  if (m_nb != BigNat(1,0)) {
+    rest.insert(rest.end(), m_nb.begin(), m_nb.end());
+  }
+
+  BigNat div(1, other.m_frac);
+  if (other.m_nb != BigNat(1,0)) {
+    div.insert(div.end(), other.m_nb.begin(), other.m_nb.end());
+  }
+
+  int comparison = Compare(rest, div);
+
+  if (comparison == 0) {
+    m_nb = BigNat(1,1);
+    m_frac = 0;
+    return *this;
+  }
+
+
+  if (comparison < 0) {
+    m_nb = BigNat(1, 0);
+
+  } else {
+
+    BigNat temp(1, rest.back());
+    rest.pop_back();
+    while (Compare(temp, div) < 0) {
+      temp.insert(temp.begin(), rest.back());
+      rest.pop_back();
+    }
+    m_nb = BigNat(rest.size() + 1);
+    size_t index = m_nb.size();
+
+    Digit digit = Div(temp, div);
+    Minus(temp, Mult(div, digit));
+    m_nb[index-1] = digit;
+    index--;
+
+    while (rest.size() > 0) {
+      if (temp == BigNat(1,0)) {
+        temp[0] = rest.back();
+      } else {
+        temp.insert(temp.begin(), rest.back());
+      }
+      rest.pop_back();
+
+      if (Compare(temp, div) >= 0) {
+        Digit digit = Div(temp, div);
+        Minus(temp, Mult(div, digit));
+        m_nb[index-1] = digit;
+      }
+
+      index--;
+    }
+
+  }
 
   return *this;
 }

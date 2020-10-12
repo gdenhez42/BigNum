@@ -20,7 +20,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 	${CMAKE_CURRENT_BINARY_DIR}/googletest-build
 	EXCLUDE_FROM_ALL)
-	
+
 # include rapidcheck_gtest
 add_subdirectory("${CMAKE_CURRENT_BINARY_DIR}/rapidcheck-download/rapidcheck/extras/gtest"
     "${CMAKE_CURRENT_BINARY_DIR}/rapidcheck-download/rapidcheck/extras/gtest"
@@ -30,6 +30,7 @@ add_executable(bignumtest
   AdditionTests.cpp
   SubstractionTests.cpp
   MultiplicationTests.cpp
+  DivisionTests.cpp
   main.cpp)
 
 target_link_libraries(bignumtest

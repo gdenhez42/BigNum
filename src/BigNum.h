@@ -48,7 +48,13 @@ class BigNum {
     b1 *= b2;
     return b1;
   }
+  friend BigNum operator/(BigNum b1, const BigNum& b2)
+  {
+    b1 /= b2;
+    return b1;
+  }
   friend std::ostream& operator<<(std::ostream& os, const BigNum& b);
 };
 
 #endif
+
