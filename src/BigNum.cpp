@@ -292,26 +292,16 @@ BigNum& BigNum::operator/=(const BigNum& other)
     div.insert(div.end(), other.m_nb.begin(), other.m_nb.end());
   }
 
-  int comparison = Compare(rest, div);
-
-  if (comparison == 0) {
-    m_nb = BigNat(1,1);
-    m_frac = 0;
-    return *this;
+  BigNat temp(1, rest.back());
+  rest.pop_back();
+  while (Compare(temp, div) < 0 && rest.size() != 0) {
+    temp.insert(temp.begin(), rest.back());
+    rest.pop_back();
   }
 
-
-  if (comparison < 0) {
-    m_nb = BigNat(1, 0);
-
+  if (Compare(temp, div) < 0) {
+    m_nb = BigNat(1,0);
   } else {
-
-    BigNat temp(1, rest.back());
-    rest.pop_back();
-    while (Compare(temp, div) < 0) {
-      temp.insert(temp.begin(), rest.back());
-      rest.pop_back();
-    }
     m_nb = BigNat(rest.size() + 1);
     size_t index = m_nb.size();
 
@@ -336,7 +326,13 @@ BigNum& BigNum::operator/=(const BigNum& other)
 
       index--;
     }
+  }
 
+  if (temp != BigNat(1,0)) {
+    temp.insert(temp.begin(), 0);
+    m_frac = Div(temp, div);
+  } else {
+    m_frac = 0;
   }
 
   return *this;
