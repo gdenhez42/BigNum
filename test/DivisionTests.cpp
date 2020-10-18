@@ -31,9 +31,16 @@ RC_GTEST_PROP(DivisionTests, DivisionByItselfGivesOne, ())
   const double d = *rc::gen::inRange(-1000000000, 1000000000);
 
   BigNum b(std::to_string(d));
-  RC_ASSERT(BigNum("1") <= b/b);
+  RC_ASSERT(BigNum("1") == b/b);
 }
 
+RC_GTEST_PROP(DivisionTests, ZeroDividedBySomethingGivesZero, ())
+{
+  const double d = *rc::gen::inRange(1, 1000000000);
+
+  BigNum b(std::to_string(d));
+  RC_ASSERT(BigNum() == BigNum()/b);
+}
 
 RC_GTEST_PROP(DivisionTests, DivisionWithIntsWorks, ())
 {

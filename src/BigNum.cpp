@@ -109,16 +109,14 @@ namespace {
 const BigNum BigNum::ZERO = BigNum();
 
 BigNum::BigNum()
-  : m_nb(1),
-    m_frac(0),
+  : m_nb(1,0),
     m_isNegative(false)
 {
 }
 
 
 BigNum::BigNum(const std::string& p_str)
-  : m_nb(),
-    m_frac(0),
+  : m_nb(1,0),
     m_isNegative(false)
 {
 
@@ -139,6 +137,10 @@ BigNum::BigNum(const std::string& p_str)
 
     base10.push_back(p_str[index] - 48);
     index++;
+  }
+
+  if (base10.size() == 1 && base10[0] == 0) {
+    base10.pop_back();
   }
 
   while (base10.size() > 0) {
@@ -167,10 +169,18 @@ BigNum::BigNum(const std::string& p_str)
     temp += base10[i] * 256 / factor;
   }
   if (temp + 0.5 > 256) {
-    Add(m_nb, 1);
+    BigNat b(2,0);
+    b[1] = 1;
+    Add(m_nb, b);
   }
 
-  m_frac = static_cast<unsigned char>(temp + 0.5);
+  m_nb[0] = static_cast<Digit>(temp + 0.5);
+}
+
+void BigNum::round()
+{
+  Add(m_nb, 128);
+  m_nb[0] = 0;
 }
 
 BigNum& BigNum::operator+=(const BigNum& other)
@@ -181,11 +191,6 @@ BigNum& BigNum::operator+=(const BigNum& other)
     *this -= temp;
     return *this;
   }
-  int temp = m_frac + other.m_frac;
-  m_frac = temp % 256;
-  temp /= 256;
-
-  Add(m_nb, temp);
   Add(m_nb, other.m_nb);
 
   return *this;
@@ -209,18 +214,6 @@ BigNum& BigNum::operator-=(const BigNum& other)
     temp = other;
   }
 
-  if (m_frac < temp.m_frac) {
-    m_frac = m_frac + 256 - temp.m_frac;
-    size_t index = 0;
-    while (m_nb[index] == 0) {
-      m_nb[index] = 255;
-      index++;
-    }
-    m_nb[index] -= 1;
-  } else {
-    m_frac -= temp.m_frac;
-  }
-
   Minus(m_nb, temp.m_nb);
 
   return *this;
@@ -234,31 +227,18 @@ BigNum& BigNum::operator*=(const BigNum& other) {
 
   if (other == ZERO) {
     m_nb = BigNat(1,0);
-    m_frac = 0;
     m_isNegative = false;
     return *this;
   }
 
   m_isNegative = m_isNegative ^ other.m_isNegative;
 
-  BigNat result;
-
-  int temp = m_frac * other.m_frac;
-  result.push_back(temp % 256);
-  temp /= 256;
-  for (size_t i = 0; i < size(); i++) {
-    temp += (m_nb[i] * other.m_frac);
-    result.push_back(temp % 256);
-    temp /= 256;
-  }
-  if (temp > 0) result.push_back(temp);
+  BigNat result(1,0);
 
   for (size_t j = 0; j < other.size(); j++) {
 
-    BigNat rTemp(j+1, 0);
-    temp = m_frac * other.m_nb[j];
-    rTemp.push_back(temp % 256);
-    temp /= 256;
+    BigNat rTemp(j, 0);
+    int temp = 0;
     for (size_t i = 0; i < size(); i++) {
       temp += (m_nb[i] * other.m_nb[j]);
       rTemp.push_back(temp % 256);
@@ -268,8 +248,7 @@ BigNum& BigNum::operator*=(const BigNum& other) {
     Add(result, rTemp);
   }
 
-  m_frac = result[1];
-  m_nb = BigNat(result.begin() + 2, result.end());
+  m_nb = BigNat(result.begin() + 1, result.end());
 
   return *this;
 }
@@ -282,15 +261,8 @@ BigNum& BigNum::operator/=(const BigNum& other)
 
   m_isNegative = m_isNegative ^ other.m_isNegative;
 
-  BigNat rest(1, m_frac);
-  if (m_nb != BigNat(1,0)) {
-    rest.insert(rest.end(), m_nb.begin(), m_nb.end());
-  }
-
-  BigNat div(1, other.m_frac);
-  if (other.m_nb != BigNat(1,0)) {
-    div.insert(div.end(), other.m_nb.begin(), other.m_nb.end());
-  }
+  BigNat rest = m_nb;
+  const BigNat& div = other.m_nb;
 
   BigNat temp(1, rest.back());
   rest.pop_back();
@@ -302,7 +274,7 @@ BigNum& BigNum::operator/=(const BigNum& other)
   if (Compare(temp, div) < 0) {
     m_nb = BigNat(1,0);
   } else {
-    m_nb = BigNat(rest.size() + 1);
+    m_nb = BigNat(rest.size() + 2, 0);
     size_t index = m_nb.size();
 
     Digit digit = Div(temp, div);
@@ -330,9 +302,9 @@ BigNum& BigNum::operator/=(const BigNum& other)
 
   if (temp != BigNat(1,0)) {
     temp.insert(temp.begin(), 0);
-    m_frac = Div(temp, div);
-  } else {
-    m_frac = 0;
+    if (Compare(temp, div) >= 0) {
+      m_nb[0] = Div(temp, div);
+    }
   }
 
   return *this;
@@ -348,28 +320,27 @@ bool BigNum::operator<(const BigNum& other) const
   if (result == -1) return !m_isNegative;
   if (result == 1) return m_isNegative;
 
-  if (m_frac < other.m_frac) return !m_isNegative;
-  if (m_frac > other.m_frac) return m_isNegative;
-
   return false;
 }
 
 bool BigNum::operator==(const BigNum& o) const
 {
   return m_isNegative == o.m_isNegative &&
-    m_nb == o.m_nb &&
-    m_frac == o.m_frac;
+    m_nb == o.m_nb;
 }
 
 std::ostream& operator<<(std::ostream& os, const BigNum& b)
 {
-  std::vector<unsigned char> base256 = b.m_nb;
+  std::vector<unsigned char> base256(b.m_nb.begin() + 1, b.m_nb.end());
 
   for (size_t i = 0; i < base256.size() / 2; i++) {
     std::swap(base256[i], base256[base256.size() - 1 - i]);
   }
 
   std::vector<unsigned char> base10;
+  if (base256.size() == 0) {
+    base10.push_back(0);
+  }
 
   while (base256.size() > 0) {
     int mod = 0;
@@ -391,9 +362,9 @@ std::ostream& operator<<(std::ostream& os, const BigNum& b)
     os << (int)base10[base10.size() - i];
   }
 
-  if (b.m_frac != 0) {
+  if (b.m_nb[0] != 0) {
     char buffer[4];
-    int fracBase10 = static_cast<int>(b.m_frac / 256.0 * 1000 + 0.5);
+    int fracBase10 = static_cast<int>(b.m_nb[0] / 256.0 * 1000 + 0.5);
     sprintf(buffer, "%03d", fracBase10);
     os << '.' << buffer;
   }

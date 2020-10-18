@@ -9,9 +9,12 @@ typedef unsigned char Digit;
 typedef std::vector<Digit> BigNat;
 
 class BigNum {
+  // First elem in m_nb is a floating point digit
+  // Zero is represented by an array of one element with value 0
   BigNat m_nb;
-  Digit m_frac;
   bool m_isNegative;
+
+  size_t size() const { return m_nb.size(); }
 
  public:
   BigNum();
@@ -19,8 +22,7 @@ class BigNum {
 
   static const BigNum ZERO;
 
-  // The size in bytes of the integer part
-  size_t size() const { return m_nb.size(); }
+  void round();
 
   BigNum& operator+=(const BigNum&);
   BigNum& operator-=(const BigNum&);

@@ -27,6 +27,7 @@ add_subdirectory("${CMAKE_CURRENT_BINARY_DIR}/rapidcheck-download/rapidcheck/ext
     EXCLUDE_FROM_ALL)
 
 add_executable(bignumtest
+  BigNumTests.cpp
   AdditionTests.cpp
   SubstractionTests.cpp
   MultiplicationTests.cpp
@@ -38,7 +39,7 @@ target_link_libraries(bignumtest
 	rapidcheck
 	rapidcheck_gtest
 	gtest)
-	
+
 target_include_directories(bignumtest PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}/rapidcheck-download/rapidcheck/ext/gmock/gtest/include)
 
