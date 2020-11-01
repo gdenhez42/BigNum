@@ -143,6 +143,10 @@ template<size_t N>
 void BigNum<N>::round()
 {
   if (N == 0) return;
+  if (size() < N-1) {
+    m_nb.clear();
+    return;
+  }
 
   int retenue = (128 + m_nb[N-1]) / 256;
   for (size_t i = N; i < size(); i++) {
