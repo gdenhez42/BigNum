@@ -145,6 +145,7 @@ void BigNum<N>::round()
   if (N == 0) return;
   if (size() < N-1) {
     m_nb.clear();
+    m_isNegative = false;
     return;
   }
 
@@ -153,6 +154,9 @@ void BigNum<N>::round()
     retenue += m_nb[i];
     m_nb[i] = retenue % 256;
     retenue /= 256;
+  }
+  if (retenue > 0) {
+    m_nb.push_back(retenue);
   }
   for (size_t i = 0; i < N; i++) {
     m_nb[i] = 0;

@@ -2,9 +2,10 @@
 #include <gtest/gtest.h>
 
 typedef BigNum<1> BigNum1;
+typedef BigNum<3> BigNum3;
 
 TEST(BigNumTests,
-     RoundTest)
+     RoundTest1)
 {
 
   BigNum1 b1(std::string("23983094384343.5"));
@@ -16,7 +17,16 @@ TEST(BigNumTests,
   EXPECT_EQ(BigNum1(std::string("23983094384344")), b1);
   EXPECT_EQ(BigNum1(std::string("387409794328709247985743")), b2);
 }
+TEST(BigNumTests,
+     RoundTest3)
+{
 
+  BigNum3 b1(std::string("0.928"));
+
+  b1.round();
+
+  EXPECT_EQ(BigNum3(std::string("1")), b1);
+}
 TEST(BigNumTests,
      FromStringToString)
 {
