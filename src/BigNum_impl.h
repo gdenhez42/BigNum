@@ -143,20 +143,27 @@ template<size_t N>
 void BigNum<N>::round()
 {
   if (N == 0) return;
-  if (size() < N-1) {
+  if (size() < N || (size() == N && m_nb[N-1] <= 128)) {
     m_nb.clear();
     m_isNegative = false;
     return;
   }
 
-  int retenue = (128 + m_nb[N-1]) / 256;
-  for (size_t i = N; i < size(); i++) {
-    retenue += m_nb[i];
-    m_nb[i] = retenue % 256;
-    retenue /= 256;
-  }
-  if (retenue > 0) {
-    m_nb.push_back(retenue);
+  bool shouldAddOne = false;
+  if (size() == N && m_nb[N-1] > 128) shouldAddOne = true;
+  else if (size() > N && m_nb[N] % 2 == 0 && m_nb[N-1] > 128) shouldAddOne = true;
+  else if (size() > N && m_nb[N] % 2 == 1 && m_nb[N-1] >= 128) shouldAddOne = true;
+
+  if (shouldAddOne) {
+    int retenue = (128 + m_nb[N-1]) / 256;
+    for (size_t i = N; i < size(); i++) {
+      retenue += m_nb[i];
+      m_nb[i] = retenue % 256;
+      retenue /= 256;
+    }
+    if (retenue > 0) {
+      m_nb.push_back(retenue);
+    }
   }
   for (size_t i = 0; i < N; i++) {
     m_nb[i] = 0;

@@ -9,13 +9,19 @@ TEST(BigNumTests,
 {
 
   BigNum1 b1(std::string("23983094384343.5"));
-  BigNum1 b2(std::string("387409794328709247985743.4"));
+  BigNum1 b2(std::string("23983094384344.5"));
+  BigNum1 b3(std::string("0.5"));
+  BigNum1 b4(std::string("387409794328709247985743.4"));
 
   b1.round();
   b2.round();
+  b3.round();
+  b4.round();
 
   EXPECT_EQ(BigNum1(std::string("23983094384344")), b1);
-  EXPECT_EQ(BigNum1(std::string("387409794328709247985743")), b2);
+  EXPECT_EQ(BigNum1(std::string("23983094384344")), b2);
+  EXPECT_EQ(BigNum1(std::string("0")), b3);
+  EXPECT_EQ(BigNum1(std::string("387409794328709247985743")), b4);
 }
 TEST(BigNumTests,
      RoundTest3)
