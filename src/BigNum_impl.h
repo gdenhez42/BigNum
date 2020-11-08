@@ -240,10 +240,12 @@ BigNum<N>& BigNum<N>::operator*=(const BigNum<N>& other) {
   m_isNegative = m_isNegative ^ other.m_isNegative;
 
   Nb result;
+  result.reserve(size() + other.size());
 
   for (size_t j = 0; j < other.size(); j++) {
 
     Nb rTemp(j, 0);
+    rTemp.reserve(size() + j + 1);
     int temp = 0;
     for (size_t i = 0; i < size(); i++) {
       temp += (m_nb[i] * other.m_nb[j]);
